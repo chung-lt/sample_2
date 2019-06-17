@@ -1,8 +1,12 @@
 class UsersController < ApplicationController
   before_action :set_user, only: [:show, :edit, :update, :destroy]
+  before_action :logged_in_user, only: [:edit, :update, :index, :show]
+  before_action :correct_user, only: [:edit, :update, :show, :destroy]
 
   # GET /users
   # GET /users.json
+  
+  
   def index
     @users = User.all
   end
@@ -20,6 +24,7 @@ class UsersController < ApplicationController
 
   # GET /users/1/edit
   def edit
+    @user = User.find(params[:id])
   end
 
   # POST /users
@@ -72,4 +77,24 @@ class UsersController < ApplicationController
     def user_params
       params.require(:user).permit(:name, :email, :password, :password_confirmation)
     end
+
+    def logged_in_user
+      unless logged_in?
+        store_location
+        respond_to do |format|
+        format.html { redirect_to login_url, notice: 'Please log in' }
+      end
+    end
+
+    def correct_user
+      unless @user == current_user
+        respond_to do |format|
+        format.html {
+          redirect_to users_url, alert: "Not your Accout, Get Out!"
+        }
+      end
+      end
+    end
+  end
 end
+
